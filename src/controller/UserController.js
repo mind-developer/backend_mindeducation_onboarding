@@ -1,11 +1,15 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const Sequelize = require("sequelize");
 
 module.exports = {
   async index(req, res) {
     try {
-      const users = await User.findAll();
-      return res.json(users);
+      if (req.user.nivel === 999 && req.user.acesso === 1) {
+        const users = await User.findAll();
+        return res.json(users);
+      }
+      return res.status(401).json({ error: "Você não tem autorização" });
     } catch (err) {
       console.log(err);
       return res
@@ -16,7 +20,15 @@ module.exports = {
   async store(req, res) {
     try {
       const data = req.body;
-
+      const userExist = await User.findOne({
+        where: Sequelize.or({ email: data.email }, { cpf: data.cpf }),
+      });
+      if (userExist) {
+        if (userExist.email === data.email) {
+          return res.status(400).json({ error: "E-mail já cadastrado" });
+        }
+        return res.status(400).json({ error: "CPF já cadastrado" });
+      }
       const user = await User.create(data);
       return res.json(user);
     } catch (err) {
@@ -28,7 +40,16 @@ module.exports = {
     try {
       const { id } = req.params;
       const data = req.body;
-
+      console.log(req.user);
+      const userExist = await User.findOne({
+        where: Sequelize.or({ email: data.email }, { cpf: data.cpf }),
+      });
+      if (userExist) {
+        if (userExist.email === data.email) {
+          return res.status(400).json({ error: "E-mail já cadastrado" });
+        }
+        return res.status(400).json({ error: "CPF já cadastrado" });
+      }
       if (data.senha) {
         data.senha = await bcrypt.hash(data.senha, 8);
       }
