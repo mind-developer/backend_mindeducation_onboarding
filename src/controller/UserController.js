@@ -21,7 +21,7 @@ module.exports = {
   async show(req, res) {
     try {
       const { id } = req.params;
-      if (req.user.nivel === 999 || req.user.id === id) {
+      if (req.user.nivel === 999 || req.user.id == id) {
         const user = await User.findOne({
           where: { id },
         });
@@ -61,7 +61,7 @@ module.exports = {
       if (data.senha) {
         data.senha = await bcrypt.hash(data.senha, 8);
       }
-      if (req.user.nivel === 999 || req.user.id === id) {
+      if (req.user.nivel === 999 || req.user.id == id) {
         await User.update(data, {
           where: { id },
         });
@@ -76,7 +76,7 @@ module.exports = {
   async destroy(req, res) {
     try {
       const { id } = req.params;
-      if (req.user.nivel === 999 || req.user.id === id) {
+      if (req.user.nivel === 999 || req.user.id == id) {
         await User.destroy({
           where: { id },
         });
